@@ -13,6 +13,10 @@
 #define fl(i,a,b) for(i=a; i<b; ++i)
 #define min(a,b) a<=b?a:b
 
+// Limit was found using the following formula n*(log(n) + log(log(n))) + 3 = 1395658
+// 2*(1395658/6) + 31 >> 5 = 14540
+int SIEVE[14540];
+
 bool isPrime(unsigned long n) {
     if(!(n & 1)) {
         return false;
@@ -50,9 +54,67 @@ unsigned long solve(int N) {
     return i - 1;
 }
 
+unsigned long solve_sieve(int n) {
+    if(n < 2) {
+        return 2;
+    }
+    else if (n == 2){
+        return 3;
+    }
+    else if (n == 3) {
+        return 5;
+    }
+    else {
+        int i = 0, count = 2;
+        for(i = 0 ; count < n ; ++i) {
+            count += __builtin_popcount(~SIEVE[i]);
+        }
+        --i;
+        int mask = ~SIEVE[i];
+        int p;
+        for(p = 31; count >= n; --p) {
+            count -= (mask >> p) & 1;
+        }
+        return 3*(p+(i<<5))+7+(p&1);
+    }
+}
+
+void compute_primes() {
+    memset(SIEVE, 0, sizeof(SIEVE));
+
+    int root = 2*(1182/6) - 1;
+    int limit = 2*(1395658/6);
+
+    for(int i = 0 ; i < root ; ++i) {
+        if((SIEVE[i >> 5] & (1 << (i&31))) == 0) {
+            int start = 0, s1 = 0, s2 = 0;
+            if(i & 1) {
+                start = i * (3*i + 8) + 4;
+                s1 = 4 * i + 5;
+                s2 = 2 * i + 3;
+            }
+            else {
+                start = i * (3 * i + 10) + 7;
+                s1 = 2 * i + 3;
+                s2 = 4 * i + 7;
+            }
+
+            for(int j = start ; j < limit ; j += s2) {
+                SIEVE[j >> 5] |= (1 << (j&31));
+                j += s1;
+                if(j >= limit) {
+                    break;
+                }
+                SIEVE[j >> 5] |= (1 << (j&31));
+            }
+        }
+    }
+}
+
 
 int main()
 {
+    compute_primes();
     int t;
     fastscan(&t);
 
