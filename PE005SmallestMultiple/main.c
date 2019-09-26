@@ -13,7 +13,7 @@
 #define fl(i,a,b) for(i=a; i<b; ++i)
 #define min(a,b) a<=b?a:b
 
-int extended_gcd(int a, int b, int* u, int* v) {
+unsigned long extended_gcd(unsigned long a, unsigned long b, int* u, int* v) {
 
     if (b == 0) {
         *u = 0;
@@ -22,7 +22,7 @@ int extended_gcd(int a, int b, int* u, int* v) {
     }
 
     int u1, v1;
-    int r = extended_gcd(b, a % b, &u1, &v1);
+    unsigned long r = extended_gcd(b, ldiv(a, b).rem, &u1, &v1);
 
     *u = v1 - (a / b) * u1;
     *v = u1;
@@ -30,12 +30,14 @@ int extended_gcd(int a, int b, int* u, int* v) {
     return r;
 }
 
-int solve(int N) {
-    int res = 1;
+unsigned long solve(int N) {
+    unsigned long res = 1;
 
     for(int i = 2; i <= N; ++i) {
         int u, v;
-        res = (abs(i * res) / extended_gcd(res, i, &u, &v));
+        //printf("pgcd: %ld\n",  extended_gcd(res, i, &u, &v));
+        res = (i * res / extended_gcd(res, i, &u, &v));
+        //printf("res: %ld\n", res);
     }
 
     return res;
@@ -50,8 +52,8 @@ int main()
     wl(t) {
         int n=0;
         fastscan(&n);
-        int res = solve(n);
-        printf("%d\n", res);
+        unsigned long res = solve(n);
+        printf("%ld\n", res);
     }
     return 0;
 }
